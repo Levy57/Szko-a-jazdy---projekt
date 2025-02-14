@@ -82,7 +82,7 @@ class KursHarmonogramCrudController extends AbstractCrudController
         $fields = [
             DateTimeField::new("start"),
             NumberField::new("czas_trwania", "Czas trwania (h)"),
-            AssociationField::new('kurs', "Praktykant")
+            AssociationField::new('kurs', "Praktykant-kurs")
                 ->formatValue(fn($value, $entity) => $value->getPraktykant()->getUserName())
                 ->setQueryBuilder(function (QueryBuilder $qb) {
                     return $qb->Where("entity.status != :status")
@@ -136,7 +136,7 @@ class KursHarmonogramCrudController extends AbstractCrudController
     {
         $actions->setPermission(Action::DELETE, (Role::ROLE_PRACOWNIK_PRAKTYKA)->value);
         $actions->setPermission(Action::EDIT, (Role::ROLE_PRACOWNIK_PRAKTYKA)->value);
-        $actions->setPermission(Action::NEW, (Role::ROLE_PRACOWNIK_PRAKTYKA)->value);
+        $actions->setPermission(Action::NEW , (Role::ROLE_PRACOWNIK_PRAKTYKA)->value);
 
         $actions->add(Crud::PAGE_INDEX, Action::DETAIL);
 

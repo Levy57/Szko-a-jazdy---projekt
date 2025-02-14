@@ -55,7 +55,7 @@ class TeoriaCrudController extends AbstractCrudController
         $teoriaID = $data['teoriaID'];
         $teoria = $this->teoriaRepository->findOneBy(['id' => $teoriaID]);
         if (!$teoria)
-            return $this->redirectToRoute('dashboard', ['crudAction' => 'detail', 'crudControllerFqcn' => TeoriaCrudController::class, 'entityId' => $id]);
+            return $this->redirectToRoute('dashboard', ['crudAction' => 'detail', 'crudControllerFqcn' => TeoriaCrudController::class, 'entityId' => $teoriaID]);
         $praktykanci = $data['praktykanci'] ?? [];
 
         $lista = $this->teoriaListaObecnosciRepository->findBy(['teoria' => $teoria]);
@@ -183,9 +183,9 @@ class TeoriaCrudController extends AbstractCrudController
 
         if (!$this->isGranted((Role::ROLE_ADMIN)->value)) {
             $entityInstance->setInstruktor($this->getUser());
-            $entityManager->persist($entityInstance);
-            $entityManager->flush();
         }
+        $entityManager->persist($entityInstance);
+        $entityManager->flush();
     }
 
     public function configureActions(Actions $actions): Actions
