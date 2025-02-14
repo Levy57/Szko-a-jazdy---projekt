@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Dostęp chroniony"
+AuthUserFile .htpasswd
+Require valid-user
