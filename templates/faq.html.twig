@@ -1,0 +1,17 @@
+{% extends '@EasyAdmin/crud/index.html.twig' %}
+
+{% block main %}
+    <div class="extra-content">
+        {% for pytanie in faq %}
+            <div class="p-3 m-3 border border-1 border-white rounded">
+                <h3>{{pytanie.title}} 
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a class="fs-6" href="{{ path('dashboard', {'crudAction': 'edit', 'crudControllerFqcn': 'App\\Controller\\FaqCrudController', 'entityId': pytanie.id}) }}">
+                        <i class="fas fa-pencil"></i> Edytuj</a>
+                    {% endif %}
+                </h3>
+                <p>{{pytanie.tekst}}</p>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,17 @@
+<div class="extra-content">
+    <h3 class="mb-4">Ostatnia teoria</h3>
+    <table style="width: 100%;">
+        <tr style="background-color: #171717;">
+            <th style="padding: 10px;">Data</th>
+                <th style="padding: 10px;">Temat</th>
+                <th style="padding: 10px;"></th>
+        </tr>
+        {% for teoria in teorie %}
+            <tr style="border-top: 1px solid #262626;">
+                <td style="padding: 10px;">{{teoria.teoria.start|date('Y-m-d H:i:s')}}</td>
+                <td style="padding: 10px;"><b>{{teoria.teoria.temat}}</b></td>
+                <td style="padding: 10px;"><a href="{{path('dashboard', {'crudAction': 'detail', 'crudControllerFqcn': 'App\\Controller\\TeoriaCrudController', 'entityId': teoria.teoria.id})|raw}}">Zobacz</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

@@ -1,0 +1,11 @@
+<?php 
+namespace App\Enum;
+
+enum Role: string
+{
+    case ROLE_ADMIN = 'ROLE_ADMIN';
+    case ROLE_PRACOWNIK_TEORIA = 'ROLE_PRACOWNIK_TEORIA';
+    case ROLE_PRACOWNIK_PRAKTYKA = 'ROLE_PRACOWNIK_PRAKTYKA';
+    case ROLE_PRAKTYKANT = 'ROLE_PRAKTYKANT';
+}
+?>

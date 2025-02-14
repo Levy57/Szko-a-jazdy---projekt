@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        
+        {% block stylesheets %}
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+            body {
+                background-color: #0a0a0a !important;
+                color: #d4d4d4;
+                font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                min-height: 80vh;
+            }
+
+            .login--container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 40px;
+                background-color: #171717;
+                border: 1px solid #262626;
+                border-radius: 20px;
+                min-width: 300px;
+            }
+
+            .login--container h1 {
+               margin-top: 0;
+            }
+
+            .login--container input {
+                background-color: #0a0a0a;
+                border: 1px solid #262626;
+                padding: 14px 20px;
+                border-radius: 8px;
+                color: #d4d4d4;
+                font-size: 16px;
+            }
+
+            .login--container button {
+                background-color: #2563eb;;
+                padding: 12px 20px;
+                font-size: 16px;
+                border-radius: 8px;
+                border: 0;
+                color: #fff;
+                font-weight: 500;
+                cursor: pointer;
+                margin-top: 16px;
+            }
+
+
+            @media (max-width: 599px) {
+                .login--container {
+                    padding: 20px;
+                    min-width: unset;
+                }
+            }
+        </style>
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+    <body class="bg-body">
+        {% block body %}{% endblock %}
+    </body>
+</html>

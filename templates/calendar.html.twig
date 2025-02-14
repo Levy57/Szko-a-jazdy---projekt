@@ -1,0 +1,109 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content %}
+    <div style="display: flex;flex-direction: column;" class="mt-4">
+    {% if pracownicy is defined %}
+        <form method="GET" action="{{path('dashboard', {'routeName': 'calendar'})}}">
+            Kalendarz pracownika:
+            <input name="routeName" value="calendar" hidden>
+            <select id="pracownikID" name="pracownikID">
+                <option value="all">Wszyscy pracownicy</option>
+                {% for pracownik in pracownicy %}
+                    <option value="{{pracownik.username}}" {{ app.request.get('pracownikID') == pracownik.username ? 'selected' : '' }}>{{pracownik.username}}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" style="display:none;"></button>
+        </form>
+
+        <script>
+        document.getElementById('pracownikID').addEventListener('change', function() {
+            this.form.submit(); 
+        });
+    </script>
+    {% endif %}
+     <div id="calendar" style="height:1000px;width:1000px"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var calendarEl = document.getElementById('calendar');
+
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                {% set parametry = app.request.query.all() %}
+                {% set eventUrl = path('calendar_events', parametry) %}
+                events: "{{eventUrl|raw}}", 
+                locale: 'pl',
+                firstDay: 1,
+                eventDisplay: 'block',
+                eventContent: function (arg) {
+                    let eventEl = document.createElement('div');
+
+                    let titleEl = document.createElement('span');
+                    titleEl.innerText = `${arg.timeText} - ${arg.event.title}`;
+                    eventEl.appendChild(titleEl);
+
+                    {% if is_granted('ROLE_PRACOWNIK_PRAKTYKA') %}
+                        if (arg.event.extendedProps.typ == 'praktyka') {
+                            let buttonEl = document.createElement('i');
+                            buttonEl.classList.add('fas', 'fa-pencil');
+                            buttonEl.style.fontSize = '14px';
+                            buttonEl.style.marginLeft = '8px';
+
+                            buttonEl.addEventListener('click', function () {
+                                window.location.href = arg.event.url_edit;
+                            });
+
+                            eventEl.appendChild(buttonEl);
+                        }
+                    {% endif %}
+
+                    return { domNodes: [eventEl] };
+                },
+                {% if is_granted('ROLE_PRACOWNIK_PRAKTYKA') %}
+                    dayCellContent: function (arg) {
+                        let dayNumber = document.createElement('span');
+                        dayNumber.innerHTML = arg.dayNumberText;
+
+                        let buttonEl = document.createElement('i');
+                        buttonEl.classList.add('fas', 'fa-plus');
+
+                        buttonEl.addEventListener('click', function () {
+                            window.location.href = "{{path('dashboard', {'crudAction': 'new', 'crudControllerFqcn': 'App\\Controller\\KursHarmonogramCrudController'})|raw}}";
+                        });
+
+                        let container = document.createElement('div');
+                        container.appendChild(dayNumber);
+                        container.appendChild(buttonEl);
+
+                        return { domNodes: [container] };
+                    }
+                {% endif %}
+            });
+
+            calendar.render();
+        });
+    </script>
+
+    <style>
+    .fc .fc-daygrid-day-number div {
+        display: flex; 
+        align-items: center;
+        gap: 5px;
+    }
+    .fc .fc-daygrid-day-number span {
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .fc .fc-daygrid-day-number i {
+        padding: 4px 4px;
+        font-size: 15px;
+        background-color: #575757;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>    
+{% endblock %}

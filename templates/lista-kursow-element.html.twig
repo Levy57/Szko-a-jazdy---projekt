@@ -1,0 +1,21 @@
+<div class="extra-content">
+    <h3 class="mb-4">Aktywne kursy</h3>
+    <table style="width: 100%;">
+        <tr style="background-color: #171717;">
+            <th style="padding: 10px;">Kat</th>
+            <th style="padding: 10px;">Teoria</th>
+            <th style="padding: 10px;">Liczba godzin praktyki</th>
+            <th style="padding: 10px;">Liczba godzin teorii</th>
+            <th style="padding: 10px;">Kurs</th>
+        </tr>
+        {% for kurs in kursy %}
+            <tr style="border-top: 1px solid #262626;">
+                <td style="padding: 10px;">{{kurs.kategoria.value}}</td>
+                <td style="padding: 10px;">{{kurs.teoria ? 'Tak' : 'Nie'}}</td>
+                <td style="padding: 10px;"><b>{{kurs.czas_trwania_praktyki}}</b> / {{kurs.praktykaGodziny}} h</td>
+                <td style="padding: 10px;"><b>{{kurs.czas_trwania_teorii}}</b> / {{kurs.teoriaGodziny}} h</td>
+                <td style="padding: 10px;"><a href="{{ path('dashboard', {'crudAction': 'detail', 'crudControllerFqcn': 'App\\Controller\\KursCrudController', 'entityId': kurs.id}) }}">{{kurs.praktykant.username}} - {{kurs.praktykant.imie}} {{kurs.praktykant.nazwisko}}</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+</div>

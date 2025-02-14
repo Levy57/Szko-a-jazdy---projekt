@@ -1,0 +1,73 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% block main %}
+    {{ parent() }}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+
+
+<br/>
+     <div class="extra-content">
+        <h3>Lista obecności</h3>
+    {% if is_granted('ROLE_PRAKTYKANT') == false %}
+        <form id="lista-obecnosci" method="POST" action="{{path("lista_obecnosci_post")}}">
+            <input type="hidden" name="teoriaID" value="{{ app.request.query.get('entityId')}}">
+            <div class="flex">
+            <select name="praktykant-szukaj" class="praktykant-szukaj">
+                <option value="">-- Wybierz praktykanta --</option>
+            </select>
+            <button type="submit">Zapisz</button>
+            </div>
+            <ul id="lista-obecnosci-ul" class="mt-3 lista-obecnosci">
+                {% for praktykant in listaObecnosci %}
+                <li data-id="{{praktykant.id}}">{{praktykant.text}} 
+                    <i role="button" class="ms-2 fas fa-remove text-danger remove-item"></i>
+                    <input type="hidden" name="praktykanci[]" value="{{praktykant.id}}">
+                </li>
+                {% endfor %}
+            </ul>
+        </form>
+
+        <script>
+            $(document).ready(function () {
+                $('.praktykant-szukaj').select2({
+                    data: {{praktykanciJson|raw}},
+                    placeholder: "Wyszukaj praktykanta",
+                    minimumInputLength: 2,
+                    width: "400px",
+                });
+
+                $('.praktykant-szukaj').on('select2:select', function (e) {
+                    let praktykant = e.params.data;
+                    $('#lista-obecnosci-ul').append(
+                        `<li data-id="${praktykant.id}">${praktykant.text} 
+                            <i role="button" class="ms-2 fas fa-remove text-danger remove-item"></i>
+                            <input type="hidden" name="praktykanci[]" value="${praktykant.id}">
+                        </li>`
+                    );
+                });
+
+                $(document).on('click', '.remove-item', function () {
+                    $(this).parent().remove();
+                });
+
+            });
+        </script>
+    {% else %}
+        <ul id="lista-obecnosci-ul" class="mt-3 lista-obecnosci">
+            <li>{{ app.user.username }} - {{ app.user.imie }} {{ app.user.nazwisko }}  - 
+            {% if praktykantObecnosc is defined and praktykantObecnosc == true %}<b class="text-success">Byłeś na zajęciach!</b>{% else %}<b class="text-danger">Nie było cię na zajęciach!</b>{% endif %}
+            </li>
+        </ul>
+    {% endif %}
+    </div>
+
+    <style>
+    .select2-selection__rendered, .select2-selection, .select2-selection--single, .select2-results__options, .select2-search  {
+        background-color: #0a0a0a !important;
+    }
+    </style>
+{% endblock %}
+
