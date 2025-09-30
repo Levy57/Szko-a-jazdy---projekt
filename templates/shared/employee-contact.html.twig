@@ -1,0 +1,11 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% block main %}
+  <h3>
+    {{ employee.username }} - {{ employee.firstName }} {{ employee.lastName }}
+  </h3>
+  <h5>
+    Tel. <a href="tel:{{ employee.phoneNumber }}">{{ employee.phoneNumber }}</a>
+  </h5>
+  <h5>Email. <a href="mailto:{{ employee.email }}">{{ employee.email }}</a></h5>
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends '@EasyAdmin/crud/detail.html.twig' %}
+
+{% block main %}
+  {{ parent() }}
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"
+  ></script>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css"
+    rel="stylesheet"
+  />
+
+  <br />
+  <div class="extra-content">
+    <h3>{{ 'attendance.title'|trans }}</h3>
+    {% if is_granted('ROLE_PRAKTYKANT') == false %}
+      <form
+        id="lista-obecnosci"
+        method="POST"
+        action="{{ path('attendance_list_post') }}"
+      >
+        <input
+          type="hidden"
+          name="theoryID"
+          value="{{ app.request.query.get('entityId') }}"
+        />
+        <div class="flex">
+          <select name="customer-szukaj" class="customer-szukaj">
+            <option value="">
+              {{ 'attendance.selectStudent'|trans }}
+            </option>
+          </select>
+          <button type="submit">{{ 'attendance.save'|trans }}</button>
+        </div>
+        <ul id="lista-obecnosci-ul" class="mt-3 lista-obecnosci">
+          {% for customer in attendanceList %}
+            <li data-id="{{ customer.id }}">
+              {{ customer.text }}
+              <i
+                role="button"
+                class="ms-2 fas fa-remove text-danger remove-item"
+              >
+
+              </i>
+              <input
+                type="hidden"
+                name="customers[]"
+                value="{{ customer.id }}"
+              />
+            </li>
+          {% endfor %}
+        </ul>
+      </form>
+
+      <script>
+        $(document).ready(function () { $('.customer-szukaj').select2({ data: {{
+          customersJson|raw
+        }}, placeholder: "{{ 'attendance.searchStudent'|trans }}", minimumInputLength: 2, width:
+        "400px", });
+
+        $('.customer-szukaj').on('select2:select', function (e) { let customer =
+        e.params.data; $('#lista-obecnosci-ul').append( `<li
+          data-id="${customer.id}"
+        >
+          ${customer.text}
+          <i role="button" class="ms-2 fas fa-remove text-danger remove-item">
+
+          </i>
+          <input type="hidden" name="customers[]" value="${customer.id}" />
+        </li>` ); });
+
+        $(document).on('click', '.remove-item', function () {
+        $(this).parent().remove(); });
+
+        });
+      </script>
+    {% else %}
+      <ul id="lista-obecnosci-ul" class="mt-3 lista-obecnosci">
+        <li>
+          {{ app.user.username }} - {{ app.user.firstName }}
+          {{ app.user.lastName }} -{% if
+            customerObecnosc is defined and customerObecnosc == true %}
+            <b class="text-success">{{ 'attendance.present'|trans }}</b>
+          {% else %}
+            <b class="text-danger">{{ 'attendance.absent'|trans }}</b>
+          {% endif %}
+        </li>
+      </ul>
+    {% endif %}
+  </div>
+
+  <style>
+    .select2-selection__rendered, .select2-selection,
+    .select2-selection--single, .select2-results__options, .select2-search {
+    background-color: #0a0a0a !important; }
+  </style>
+{% endblock %}

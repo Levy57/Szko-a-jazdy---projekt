@@ -1,0 +1,32 @@
+<div class="extra-content">
+  <h3 class="mb-4">{{ 'theory.recent'|trans }}</h3>
+  <table style="width: 100%;">
+    <tr style="background-color: #171717;">
+      <th style="padding: 10px;">{{ 'courses.date'|trans }}</th>
+      <th style="padding: 10px;">{{ 'theory.topic'|trans }}</th>
+      <th style="padding: 10px;"></th>
+    </tr>
+    {% for theory in theories %}
+      <tr style="border-top: 1px solid #262626;">
+        <td style="padding: 10px;">
+          {{ theory.theory.startAt|date('Y-m-d H:i:s') }}
+        </td>
+        <td style="padding: 10px;"><b>{{ theory.theory.title }}</b></td>
+        <td style="padding: 10px;">
+          <a
+            href="{{ path(
+              'dashboard',
+              {
+                crudAction: 'detail',
+                crudControllerFqcn: 'App\\Controller\\TheoryCrudController',
+                entityId: theory.theory.id
+              }
+            )|raw }}"
+          >
+            {{ 'theory.view'|trans }}
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>

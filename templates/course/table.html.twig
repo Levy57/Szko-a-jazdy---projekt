@@ -1,0 +1,43 @@
+<div class="extra-content">
+  <h3 class="mb-4">{{ 'courses.activeCourses'|trans }}</h3>
+  <table style="width: 100%;">
+    <tr style="background-color: #171717;">
+      <th style="padding: 10px;">{{ 'courses.category'|trans }}</th>
+      <th style="padding: 10px;">{{ 'theory'|trans }}</th>
+      <th style="padding: 10px;">{{ 'courses.practiceHoursCount'|trans }}</th>
+      <th style="padding: 10px;">{{ 'courses.theoryHoursCount'|trans }}</th>
+      <th style="padding: 10px;">{{ 'course'|trans }}</th>
+    </tr>
+    {% for course in courses %}
+      <tr style="border-top: 1px solid #262626;">
+        <td style="padding: 10px;">{{ course.category.name }}</td>
+        <td style="padding: 10px;">{{ course.theory ? 'courses.yes'|trans : 'courses.no'|trans }}</td>
+        <td style="padding: 10px;">
+          <b>{{ course.courseHoursSum }}</b> / {{
+            course.courseHours
+          }} h
+        </td>
+        <td style="padding: 10px;">
+          <b>{{ course.theoryHoursSum }}</b> / {{ course.theoryHours }} h
+        </td>
+        <td style="padding: 10px;">
+          <a
+            href="{{
+            path(
+              'dashboard',
+              {
+                crudAction: 'detail',
+                crudControllerFqcn: 'App\\Controller\\CourseCrudController',
+                entityId: course.id
+              }
+            )
+            }}"
+          >
+            {{ course.customer.username }} - {{ course.customer.firstName }}
+            {{ course.customer.lastName }}
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>

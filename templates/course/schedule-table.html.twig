@@ -1,0 +1,57 @@
+<div class="extra-content">
+  <h3 class="mb-4">{{ 'courses.recentLessons'|trans }}</h3>
+  <table style="width: 100%;">
+    <tr style="background-color: #171717;">
+      <th style="padding: 10px;">{{ 'courses.date'|trans }}</th>
+      <th style="padding: 10px;">{{ 'courses.category'|trans }}</th>
+      <th style="padding: 10px;">{{ 'courses.hours'|trans }}</th>
+      {% if is_granted('CUSTOMER') == false %}
+        <th style="padding: 10px;">{{ 'courses.comment'|trans }}</th>
+      {% endif %}
+      <th style="padding: 10px;">{{ 'courses.instructor'|trans }}</th>
+      <th style="padding: 10px;"></th>
+    </tr>
+    {% for course in coursesSchedule %}
+      <tr style="border-top: 1px solid #262626;">
+        <td style="padding: 10px;">{{ course.startAt|date('Y-m-d H:i:s') }}</td>
+        <td style="padding: 10px;">{{ course.course.category.name }}</td>
+        <td style="padding: 10px;">
+          <b>{{ course.courseHours }}</b> / {{
+            course.courseHours
+          }} h
+        </td>
+        {% if is_granted('CUSTOMER') == false %}
+          <td style="padding: 10px;"><b>{{ course.comment }}</b></td>
+        {% endif %}
+        <td style="padding: 10px;">
+          <a
+            href="{{ path(
+              'dashboard',
+              {
+                crudAction: 'detail',
+                crudControllerFqcn: 'App\\Controller\\UserCrudController',
+                entityId: course.employee.id
+              }
+            )|raw }}"
+          >
+            {{ course.employee.username }}
+          </a>
+        </td>
+        <td style="padding: 10px;">
+          <a
+            href="{{ path(
+              'dashboard',
+              {
+                crudAction: 'detail',
+                crudControllerFqcn: 'App\\Controller\\CourseScheduleCrudController',
+                entityId: course.id
+              }
+            )|raw }}"
+          >
+            Zobacz
+          </a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+</div>

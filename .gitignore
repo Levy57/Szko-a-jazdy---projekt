@@ -9,6 +9,8 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
+.idea
+
 ###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache
@@ -23,3 +25,11 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
+/node_modules
+.vscode/sftp.json
+.env

@@ -1,16 +1,10 @@
 {% extends '@EasyAdmin/page/content.html.twig' %}
 
 {% block content %}
-    <div>
-        <h1 class="mt-4">Witaj w OSK</h1>
-        <div class="mt-3">
-            {% if kursyPraktykant is defined %}
-                <h2 class="h5 mb-4">Twoje kursy:</h2>
-                {% include 'kursy-praktykanta.html.twig' %}
-            {% endif %}
-            {% if is_granted('ROLE_PRACOWNIK_PRAKTYKA') %}
-                {% include 'lista-kursow-element.html.twig' %}
-            {% endif %}
-        </div>
+  <div>
+    <h1 class="mt-4">Witaj w OSK</h1>
+    <div class="mt-3">
+      {% include 'course/table.html.twig' %}
     </div>
+  </div>
 {% endblock %}

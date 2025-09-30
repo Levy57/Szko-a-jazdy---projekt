@@ -4,12 +4,16 @@ ini_set('display_errors', 1);
 ini_set('memory_limit', -1);
 set_time_limit(0);
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') exit;
+if ('POST' !== $_SERVER['REQUEST_METHOD']) {
+    exit;
+}
 
-function slugify($string) {
+function slugify($string)
+{
     $slug = strtolower($string);
-    $slug = preg_replace("/[^a-z0-9-]+/", "-", $string);
-    return trim($slug, "-");
+    $slug = preg_replace('/[^a-z0-9-]+/', '-', $string);
+
+    return trim($slug, '-');
 }
 
 $firma = trim($_POST['nazwa_firmy']);
@@ -23,7 +27,7 @@ $kategorie = implode(',', $kategorie);
 $haslo = trim($_POST['haslo']);
 $password = password_hash($haslo, PASSWORD_BCRYPT, ['cost' => 13]);
 
-$username = "P-" . strtoupper(substr($imie, 0, 1)) . strtoupper(substr($nazwisko, 0, 1)) . str_pad(1, 2, '0', STR_PAD_LEFT);
+$username = 'P-'.strtoupper(substr($imie, 0, 1)).strtoupper(substr($nazwisko, 0, 1)).str_pad(1, 2, '0', STR_PAD_LEFT);
 
 $sciezka = escapeshellarg("../firmy/$domena");
 
@@ -49,19 +53,19 @@ $output = shell_exec("bash ./generuj.sh $domenaShell $env 2>&1");
 $db = new mysqli($database->database_host, $database->database_user, $database->database_password, $database->database_name);
 
 $role = json_encode(['ROLE_ADMIN', 'ROLE_PRACOWNIK_TEORIA', 'ROLE_PRACOWNIK_PRAKTYKA']);
-$stmt = $db->prepare("INSERT INTO 
+$stmt = $db->prepare('INSERT INTO 
 `user`(`username`, `roles`, `password`, `imie`, `nazwisko`, `numer_telefonu`, `kategoria_uprawnien`, `email`) VALUES 
-(?,?,?,?,?,?,?,?)");
-$stmt->bind_param("ssssssss", $username, $role, $password, $imie, $nazwisko, $numer_telefonu, $kategorie, $email);
+(?,?,?,?,?,?,?,?)');
+$stmt->bind_param('ssssssss', $username, $role, $password, $imie, $nazwisko, $numer_telefonu, $kategorie, $email);
 $stmt->execute();
 
 ?>
 
 Strona została utworzona.<br />
-Twój login: <?= $username ?><br />
+Twój login: <?php echo $username; ?><br />
 <br />
 <br />
-<a href="https://<?= $domena ?>.osk.solvant.pl">Zaloguj się</a>
+<a href="https://<?php echo $domena; ?>.osk.solvant.pl">Zaloguj się</a>
 
 <?php
 

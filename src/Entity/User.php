@@ -2,15 +2,13 @@
 
 namespace App\Entity;
 
-use App\Enum\Kategoria;
 use App\Enum\Status;
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
@@ -24,12 +22,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $username = null;
 
-
-    /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = ['ROLE_PRAKTYKANT'];
+    #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: 'users')]
+    private Collection $roles;
 
     /**
      * @var string The hashed password
@@ -38,61 +32,68 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $imie = null;
+    private ?string $firstName = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nazwisko = null;
+    private ?string $lastName = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $numer_telefonu = null;
+    private ?string $phoneNumber = null;
 
-    #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true, enumType: Kategoria::class)]
-    private ?array $kategoria_uprawnien = null;
+    /**
+     * @var Collection<int, Category>
+     */
+    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'users')]
+    #[ORM\JoinTable(name: 'user_category')]
+    private Collection $categories;
 
     #[ORM\Column(length: 255)]
     private ?string $email = null;
 
-    /**
-     * @var Collection<int, Kurs>
-     */
-    #[ORM\OneToMany(targetEntity: Kurs::class, mappedBy: 'praktykant')]
-    private Collection $kurs;
+    #[ORM\Column(type: 'string', length: 5, options: ['default' => 'pl'])]
+    private string $locale = 'pl';
 
     /**
-     * @var Collection<int, Kurs>
+     * @var Collection<int, Course>
      */
-    #[ORM\OneToMany(targetEntity: Kurs::class, mappedBy: 'instruktor')]
-    private Collection $kursInstruktor;
-    private Collection $kursInstruktorAktywne;
+    #[ORM\OneToMany(targetEntity: Course::class, mappedBy: 'customer', cascade: ["remove"])]
+    private Collection $course;
 
     /**
-     * @var Collection<int, KursHarmonogram>
+     * @var Collection<int, Course>
      */
-    #[ORM\OneToMany(targetEntity: KursHarmonogram::class, mappedBy: 'instruktor', orphanRemoval: true)]
-    private Collection $kursHarmonograms;
+    #[ORM\OneToMany(targetEntity: Course::class, mappedBy: 'employee')]
+    private Collection $courseEmployee;
+    private Collection $courseEmployeeActive;
 
     /**
-     * @var Collection<int, Teoria>
+     * @var Collection<int, CourseSchedule>
      */
-    #[ORM\OneToMany(targetEntity: Teoria::class, mappedBy: 'instruktor')]
-    private Collection $teoriaInstruktor;
+    #[ORM\OneToMany(targetEntity: CourseSchedule::class, mappedBy: 'employee', orphanRemoval: true)]
+    private Collection $courseSchedules;
 
     /**
-     * @var Collection<int, TeoriaListaObecnosci>
+     * @var Collection<int, Theory>
      */
-    #[ORM\OneToMany(targetEntity: TeoriaListaObecnosci::class, mappedBy: 'praktykant')]
-    private Collection $teoriaListaObecnoscis;
+    #[ORM\OneToMany(targetEntity: Theory::class, mappedBy: 'employee')]
+    private Collection $theoryEmployee;
 
+    /**
+     * @var Collection<int, TheoryAttendanceList>
+     */
+    #[ORM\OneToMany(targetEntity: TheoryAttendanceList::class, mappedBy: 'customer')]
+    private Collection $theoryAttendanceLists;
 
     public function __construct()
     {
-        $this->kurs = new ArrayCollection();
-        $this->kursInstruktor = new ArrayCollection();
-        $this->kursInstruktorAktywne = new ArrayCollection();
-        $this->kursy = new ArrayCollection();
-        $this->kursHarmonograms = new ArrayCollection();
-        $this->teoriaInstruktor = new ArrayCollection();
-        $this->teoriaListaObecnoscis = new ArrayCollection();
+        $this->roles = new ArrayCollection();
+        $this->categories = new ArrayCollection();
+        $this->course = new ArrayCollection();
+        $this->courseEmployee = new ArrayCollection();
+        $this->courseEmployeeActive = new ArrayCollection();
+        $this->courseSchedules = new ArrayCollection();
+        $this->theoryEmployee = new ArrayCollection();
+        $this->theoryAttendanceLists = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -122,32 +123,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->username;
     }
 
-    /**
-     * @see UserInterface
-     * @return list<string>
-     */
     public function getRoles(): array
     {
-        $roles = $this->roles;
+        $roles = [];
+        foreach ($this->roles as $role) {
+            foreach ($role->getPermissions() as $permission) {
+                $roles[] = $permission->value;
+            }
+        }
 
-        $role = array_map(function ($role) {
-            if (isset($role->value))
-                return $role->value;
-            else
-                return $role;
-        }, $roles);
-
-
-        return $role;
+        return array_unique($roles);
     }
 
     /**
-     * @param list<string> $roles
+     * @return Collection<int, Role>
      */
-    public function setRoles(array $roles): static
+    public function getUserRoles(): Collection
     {
-        $this->roles = $roles;
+        return $this->roles;
+    }
 
+    public function addRole(Role $role): self
+    {
+        if (!$this->roles->contains($role)) {
+            $this->roles->add($role);
+        }
+
+        return $this;
+    }
+
+    public function removeRole(Role $role): self
+    {
+        $this->roles->removeElement($role);
         return $this;
     }
 
@@ -159,7 +166,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(?string $password): static
     {
         $this->password = $password;
 
@@ -175,53 +182,62 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    public function getImie(): ?string
+    public function getFirstName(): ?string
     {
-        return $this->imie;
+        return $this->firstName;
     }
 
-    public function setImie(string $imie): static
+    public function setFirstName(string $firstName): static
     {
-        $this->imie = $imie;
+        $this->firstName = $firstName;
 
         return $this;
     }
 
-    public function getNazwisko(): ?string
+    public function getLastName(): ?string
     {
-        return $this->nazwisko;
+        return $this->lastName;
     }
 
-    public function setNazwisko(string $nazwisko): static
+    public function setLastName(string $lastName): static
     {
-        $this->nazwisko = $nazwisko;
+        $this->lastName = $lastName;
 
         return $this;
     }
 
-    public function getNumerTelefonu(): ?string
+    public function getPhoneNumber(): ?string
     {
-        return $this->numer_telefonu;
+        return $this->phoneNumber;
     }
 
-    public function setNumerTelefonu(string $numer_telefonu): static
+    public function setPhoneNumber(string $phoneNumber): static
     {
-        $this->numer_telefonu = $numer_telefonu;
+        $this->phoneNumber = $phoneNumber;
 
         return $this;
     }
 
     /**
-     * @return Kategoria[]|null
+     * @return Collection<int, Category>
      */
-    public function getKategoriaUprawnien(): ?array
+    public function getCategories(): Collection
     {
-        return $this->kategoria_uprawnien;
+        return $this->categories;
     }
 
-    public function setKategoriaUprawnien(?array $kategoria_uprawnien): static
+    public function addCategory(Category $category): static
     {
-        $this->kategoria_uprawnien = $kategoria_uprawnien;
+        if (!$this->categories->contains($category)) {
+            $this->categories->add($category);
+        }
+
+        return $this;
+    }
+
+    public function removeCategory(Category $category): static
+    {
+        $this->categories->removeElement($category);
 
         return $this;
     }
@@ -238,57 +254,72 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Kurs>
-     */
-    public function getKurs(): Collection
+    public function getLocale(): ?string
     {
-        return $this->kurs;
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): static
+    {
+        $this->locale = $locale;
+
+        return $this;
     }
 
     /**
-     * @return Collection<int, Kurs>
+     * @return Collection<int, Course>
      */
-    public function getKursInstruktor(): Collection
+    public function getCourse(): Collection
     {
-        return $this->kursInstruktor;
-    }
-    /**
-     * @return Collection<int, Kurs>
-     */
-    public function getKursInstruktorAktywne(): Collection
-    {
-        $kursy = new ArrayCollection();
-        foreach ($this->kursInstruktor as $kurs)
-            if ($kurs->getStatus() != (Status::Ukonczony)->value)
-                $kursy[] = $kurs;
-        return $kursy;
+        return $this->course;
     }
 
     /**
-     * @return Collection<int, KursHarmonogram>
+     * @return Collection<int, Course>
      */
-    public function getKursHarmonograms(): Collection
+    public function getCourseEmployee(): Collection
     {
-        return $this->kursHarmonograms;
+        return $this->courseEmployee;
     }
 
-    public function addKursHarmonogram(KursHarmonogram $kursHarmonogram): static
+    /**
+     * @return Collection<int, Course>
+     */
+    public function getCourseEmployeeActive(): Collection
     {
-        if (!$this->kursHarmonograms->contains($kursHarmonogram)) {
-            $this->kursHarmonograms->add($kursHarmonogram);
-            $kursHarmonogram->setInstruktor($this);
+        $courses = new ArrayCollection();
+        foreach ($this->courseEmployee as $course) {
+            if ($course->getStatus() != Status::completed->value) {
+                $courses[] = $course;
+            }
+        }
+
+        return $courses;
+    }
+
+    /**
+     * @return Collection<int, CourseSchedule>
+     */
+    public function getCourseSchedules(): Collection
+    {
+        return $this->courseSchedules;
+    }
+
+    public function addCourseSchedule(CourseSchedule $courseSchedule): static
+    {
+        if (!$this->courseSchedules->contains($courseSchedule)) {
+            $this->courseSchedules->add($courseSchedule);
+            $courseSchedule->setEmployee($this);
         }
 
         return $this;
     }
 
-    public function removeKursHarmonogram(KursHarmonogram $kursHarmonogram): static
+    public function removeCourseHarmonogram(CourseSchedule $courseSchedule): static
     {
-        if ($this->kursHarmonograms->removeElement($kursHarmonogram)) {
-            // set the owning side to null (unless already changed)
-            if ($kursHarmonogram->getInstruktor() === $this) {
-                $kursHarmonogram->setInstruktor(null);
+        if ($this->courseSchedules->removeElement($courseSchedule)) {
+            if ($courseSchedule->getEmployee() === $this) {
+                $courseSchedule->setEmployee(null);
             }
         }
 
@@ -296,29 +327,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Teoria>
+     * @return Collection<int, Theory>
      */
-    public function getTeoriaInstruktor(): Collection
+    public function getTheoryEmployee(): Collection
     {
-        return $this->teoriaInstruktor;
+        return $this->theoryEmployee;
     }
 
-    public function addTeoriaInstruktor(Teoria $teoriaInstruktor): static
+    public function addTheoryEmployee(Theory $theoryEmployee): static
     {
-        if (!$this->teoriaInstruktor->contains($teoriaInstruktor)) {
-            $this->teoriaInstruktor->add($teoriaInstruktor);
-            $teoriaInstruktor->setInstruktor($this);
+        if (!$this->theoryEmployee->contains($theoryEmployee)) {
+            $this->theoryEmployee->add($theoryEmployee);
+            $theoryEmployee->setEmployee($this);
         }
 
         return $this;
     }
 
-    public function removeTeoriaInstruktor(Teoria $teoriaInstruktor): static
+    public function removeTheoryEmployee(Theory $theoryEmployee): static
     {
-        if ($this->teoriaInstruktor->removeElement($teoriaInstruktor)) {
-            // set the owning side to null (unless already changed)
-            if ($teoriaInstruktor->getInstruktor() === $this) {
-                $teoriaInstruktor->setInstruktor(null);
+        if ($this->theoryEmployee->removeElement($theoryEmployee)) {
+            if ($theoryEmployee->getEmployee() === $this) {
+                $theoryEmployee->setEmployee(null);
             }
         }
 
@@ -326,29 +356,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, TeoriaListaObecnosci>
+     * @return Collection<int, TheoryAttendanceList>
      */
-    public function getTeoriaListaObecnoscis(): Collection
+    public function getTheoryAttendanceLists(): Collection
     {
-        return $this->teoriaListaObecnoscis;
+        return $this->theoryAttendanceLists;
     }
 
-    public function addTeoriaListaObecnosci(TeoriaListaObecnosci $teoriaListaObecnosci): static
+    public function addTheoryAttendanceList(TheoryAttendanceList $theoryAttendanceList): static
     {
-        if (!$this->teoriaListaObecnoscis->contains($teoriaListaObecnosci)) {
-            $this->teoriaListaObecnoscis->add($teoriaListaObecnosci);
-            $teoriaListaObecnosci->setPraktykant($this);
+        if (!$this->theoryAttendanceLists->contains($theoryAttendanceList)) {
+            $this->theoryAttendanceLists->add($theoryAttendanceList);
+            $theoryAttendanceList->setCustomer($this);
         }
 
         return $this;
     }
 
-    public function removeTeoriaListaObecnosci(TeoriaListaObecnosci $teoriaListaObecnosci): static
+    public function removeTheoryAttendanceList(TheoryAttendanceList $theoryAttendanceList): static
     {
-        if ($this->teoriaListaObecnoscis->removeElement($teoriaListaObecnosci)) {
-            // set the owning side to null (unless already changed)
-            if ($teoriaListaObecnosci->getPraktykant() === $this) {
-                $teoriaListaObecnosci->setPraktykant(null);
+        if ($this->theoryAttendanceLists->removeElement($theoryAttendanceList)) {
+            if ($theoryAttendanceList->getCustomer() === $this) {
+                $theoryAttendanceList->setCustomer(null);
             }
         }
 

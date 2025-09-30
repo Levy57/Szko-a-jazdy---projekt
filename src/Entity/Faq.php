@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Repository\FaqRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\FaqRepository;
 
 #[ORM\Entity(repositoryClass: FaqRepository::class)]
 class Faq
@@ -17,7 +17,7 @@ class Faq
     private ?string $title = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $tekst = null;
+    private ?string $description = null;
 
     public function getId(): ?int
     {
@@ -36,14 +36,14 @@ class Faq
         return $this;
     }
 
-    public function getTekst(): ?string
+    public function getDescription(): ?string
     {
-        return $this->tekst;
+        return $this->description;
     }
 
-    public function setTekst(?string $tekst): static
+    public function setDescription(?string $description): static
     {
-        $this->tekst = $tekst;
+        $this->description = $description;
 
         return $this;
     }

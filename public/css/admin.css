@@ -1,0 +1,9 @@
+/* vendor\easycorp\easyadmin-bundle\assets\css\easyadmin-theme\variables-theme.css */
+:root,
+.ea-dark-scheme {
+    --body-max-width: 100%;
+    --font-size-base: 14px;
+    --border-radius: 10px;
+    --border-radius-lg: 10px;
+    --border-radius-sm: 10px;
+}

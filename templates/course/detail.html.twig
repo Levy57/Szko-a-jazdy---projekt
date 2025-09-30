@@ -1,0 +1,31 @@
+<div style="display: grid; grid-template-columns: repeat(auto-fill, 400px)">
+  {% if courses is defined %}
+    {% for course in courses %}
+      <div style="padding: 20px; border: 1px solid #262626;">
+        <ul>
+          <li>{{ 'courses.category'|trans }}: {{ course.category.value }}</li>
+          {% if course.theory %}
+            <li>
+              {{ 'courses.theoryHoursLabel'|trans }}: {{ course.czas_trwania_teorii }}/{{
+                course.theoryGodziny
+              }} h
+            </li>
+          {% endif %}
+          <li>
+            {{ 'courses.practiceHoursLabel'|trans }}: {{ course.czas_trwania_praktyki }}/{{ course.praktykaGodziny }}
+          </li>
+          {% if course.employee %}
+            <li>
+              {{ 'courses.supervisor'|trans }}: {{ course.employee.username }} - <b>
+                {{ course.employee.firstName }} {{ course.employee.lastName }}
+              </b>
+              <br /> {{ 'courses.phone'|trans }} <a href="tel:+48{{ course.employee.phoneNumber }}">{{
+                  course.employee.phoneNumber
+                }}</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
